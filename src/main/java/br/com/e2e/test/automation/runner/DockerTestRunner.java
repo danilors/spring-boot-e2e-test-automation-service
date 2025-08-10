@@ -1,19 +1,22 @@
-package br.com.e2e.test.automation;
+package br.com.e2e.test.automation.runner;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.async.ResultCallback;
 import com.github.dockerjava.api.command.CreateContainerResponse;
+import com.github.dockerjava.api.exception.NotFoundException;
 import com.github.dockerjava.api.model.Frame;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientImpl;
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
+import java.io.*;
 
 @Service
 public class DockerTestRunner {
@@ -25,6 +28,12 @@ public class DockerTestRunner {
 
     @Value("${e2e.git.repo.url:https://github.com/seu-usuario/seu-repositorio.git}")
     private String gitRepoUrl;
+
+    @Value("${e2e.reports.container-path:/app/target/surefire-reports}")
+    private String reportsContainerPath;
+
+    @Value("${e2e.reports.host-path:./test-reports}")
+    private String reportsHostPath;
 
     @Async
     public void runE2ETestsInDocker() {
@@ -67,6 +76,11 @@ public class DockerTestRunner {
                 int exitCode = dockerClient.waitContainerCmd(containerId).start().awaitStatusCode();
                 log.info("Container finished with exit code: {}", exitCode);
 
+                // After execution, copy the reports from the container to the host.
+                // This is done regardless of the exit code, as even failed tests generate reports.
+                log.info("Attempting to copy test reports from container {}...", containerId);
+                copyReportsFromContainer(dockerClient, containerId);
+
             } finally {
                 log.info("Removing container {}", containerId);
                 dockerClient.removeContainerCmd(containerId).withForce(true).exec();
@@ -74,6 +88,49 @@ public class DockerTestRunner {
             }
         } catch (IOException e) {
             log.error("Failed to close Docker client resources.", e);
+        }
+    }
+
+    /**
+     * Copies a directory from the container, which is delivered as a TAR stream,
+     * and extracts it to the configured host path.
+     *
+     * @param dockerClient The active DockerClient.
+     * @param containerId  The ID of the container to copy from.
+     */
+    private void copyReportsFromContainer(DockerClient dockerClient, String containerId) {
+        try (InputStream tarStream = dockerClient.copyArchiveFromContainerCmd(containerId, reportsContainerPath).exec()) {
+            untar(tarStream, reportsHostPath);
+            log.info("Successfully copied and extracted reports to host path: {}", new File(reportsHostPath).getAbsolutePath());
+        } catch (NotFoundException e) {
+            log.warn("Could not find report directory '{}' in container. Tests may have failed before reports were generated.", reportsContainerPath);
+        } catch (IOException e) {
+            log.error("Failed to copy or extract reports from container {}.", containerId, e);
+        }
+    }
+
+    /**
+     * Extracts a TAR input stream to a destination directory on the host.
+     *
+     * @param tarInputStream  The TAR stream to extract.
+     * @param destinationPath The path on the host to extract files to.
+     * @throws IOException if an I/O error occurs.
+     */
+    private void untar(InputStream tarInputStream, String destinationPath) throws IOException {
+        File destDir = new File(destinationPath);
+        destDir.mkdirs(); // Ensure the destination directory exists
+        try (TarArchiveInputStream tarIn = new TarArchiveInputStream(tarInputStream)) {
+            TarArchiveEntry entry;
+            while ((entry = tarIn.getNextTarEntry()) != null) {
+                File destFile = new File(destDir, entry.getName());
+                if (entry.isDirectory()) {
+                    destFile.mkdirs();
+                } else {
+                    try (OutputStream out = new FileOutputStream(destFile)) {
+                        tarIn.transferTo(out);
+                    }
+                }
+            }
         }
     }
 }

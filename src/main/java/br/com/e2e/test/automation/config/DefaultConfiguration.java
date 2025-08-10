@@ -1,4 +1,4 @@
-package br.com.e2e.test.automation;
+package br.com.e2e.test.automation.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.Bean;
