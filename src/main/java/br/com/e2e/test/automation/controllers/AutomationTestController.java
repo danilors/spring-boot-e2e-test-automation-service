@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.nio.file.Path;
+
 @RestController
 @RequestMapping("/api/tests/")
 public class AutomationTestController {
@@ -20,7 +22,7 @@ public class AutomationTestController {
     @GetMapping
     @RequestMapping("/start")
     public ResponseEntity<Void> startTests() {
-        dockerTestRunner.runE2ETestsInDocker();
+        dockerTestRunner.runTestsAndCopyReport("/home/user/pastadestino");
         return ResponseEntity.ok().build();
     }
 }

@@ -49,19 +49,7 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Core Docker-Java library -->
-        <dependency>
-            <groupId>com.github.docker-java</groupId>
-            <artifactId>docker-java</artifactId>
-            <version>3.3.6</version>
-        </dependency>
 
-        <!-- Transport implementation using Apache HttpClient 5 -->
-        <dependency>
-            <groupId>com.github.docker-java</groupId>
-            <artifactId>docker-java-transport-httpclient5</artifactId>
-            <version>3.3.6</version>
-        </dependency>
 
         <!-- Jackson for JSON data binding. Version is managed by spring-boot-starter-parent. -->
         <dependency>
@@ -69,12 +57,6 @@
             <artifactId>jackson-databind</artifactId>
         </dependency>
 
-        <!-- For extracting TAR archives from Docker containers -->
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-compress</artifactId>
-            <version>1.26.2</version>
-        </dependency>
     </dependencies>
 
     <build>

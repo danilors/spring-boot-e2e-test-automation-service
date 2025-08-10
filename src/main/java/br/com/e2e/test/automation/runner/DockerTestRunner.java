@@ -1,136 +1,119 @@
 package br.com.e2e.test.automation.runner;
 
-import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.api.async.ResultCallback;
-import com.github.dockerjava.api.command.CreateContainerResponse;
-import com.github.dockerjava.api.exception.NotFoundException;
-import com.github.dockerjava.api.model.Frame;
-import com.github.dockerjava.core.DefaultDockerClientConfig;
-import com.github.dockerjava.core.DockerClientImpl;
-import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.List;
 
 @Service
 public class DockerTestRunner {
+    //add logger
+    private static final Logger logger = LoggerFactory.getLogger(DockerTestRunner.class.getSimpleName());
 
-    private static final Logger log = LoggerFactory.getLogger(DockerTestRunner.class);
-
-    @Value("${e2e.docker.image:maven:3.8.7-openjdk-17}")
-    private String dockerImage;
-
-    @Value("${e2e.git.repo.url:https://github.com/seu-usuario/seu-repositorio.git}")
-    private String gitRepoUrl;
-
-    @Value("${e2e.reports.container-path:/app/target/surefire-reports}")
-    private String reportsContainerPath;
-
-    @Value("${e2e.reports.host-path:./test-reports}")
-    private String reportsHostPath;
+   private final  String repoName = "spring-boot-chain-services";
+    private final String repoUrl = "git@github.com:danilors/spring-boot-chain-services.git";
 
     @Async
-    public void runE2ETestsInDocker() {
-        DefaultDockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder().build();
+    public void runTestsAndCopyReport(String destination) {
+        Path tempDir = null;
+        try {
+            // 1. Create temp directory
+            Path reportDestination = Path.of(destination);
+            tempDir = Files.createTempDirectory("cloned-repo-" + repoName + "-");
+            // 2. Clone the repository
+            runCommand(List.of("git", "clone", repoUrl, tempDir.toString()), Paths.get("."));
 
-        try (ApacheDockerHttpClient httpClient = new ApacheDockerHttpClient.Builder()
-                .dockerHost(config.getDockerHost())
-                .sslConfig(config.getSSLConfig())
-                .build();
-             DockerClient dockerClient = DockerClientImpl.getInstance(config, httpClient)) {
+            // 3. Detect project type
+            boolean isMaven = Files.exists(tempDir.resolve("pom.xml"));
+            boolean isGradle = Files.exists(tempDir.resolve("build.gradle"));
+            boolean isNode = Files.exists(tempDir.resolve("package.json"));
+            boolean isDockerfile = Files.exists(tempDir.resolve("Dockerfile"));
 
-            String command = String.format("git clone %s /app && cd /app && mvn clean test", gitRepoUrl);
+            // 4. Run tests
+            if (isDockerfile) {
+                // Build and run Docker image, mounting report destination
+                String imageName = "temp-test-image";
 
-            CreateContainerResponse container = dockerClient.createContainerCmd(dockerImage)
-                    .withCmd("sh", "-c", command)
-                    .exec();
+                runCommand(List.of("docker", "build", "-t", imageName, "."), tempDir);
+                // You may need to adjust the container report path based on the Dockerfile/project
+                String containerReportPath = isMaven ? "/app/target/surefire-reports" :
+                        isNode ? "/app/cypress/reports" : "/app/reports";
 
-            String containerId = container.getId();
-            log.info("Container created with ID: {}", containerId);
-
-            try {
-                // Configura o streaming de logs antes de iniciar o contêiner
-                ResultCallback.Adapter<Frame> logCallback = new ResultCallback.Adapter<>() {
-                    @Override
-                    public void onNext(Frame frame) {
-                        log.info(new String(frame.getPayload()).trim());
-                    }
-                };
-
-                dockerClient.logContainerCmd(containerId)
-                        .withStdOut(true)
-                        .withStdErr(true)
-                        .withFollowStream(true)
-                        .exec(logCallback);
-
-                // Inicia o contêiner
-                dockerClient.startContainerCmd(containerId).exec();
-
-                // Aguarda a finalização
-                int exitCode = dockerClient.waitContainerCmd(containerId).start().awaitStatusCode();
-                log.info("Container finished with exit code: {}", exitCode);
-
-                // After execution, copy the reports from the container to the host.
-                // This is done regardless of the exit code, as even failed tests generate reports.
-                log.info("Attempting to copy test reports from container {}...", containerId);
-                copyReportsFromContainer(dockerClient, containerId);
-
-            } finally {
-                log.info("Removing container {}", containerId);
-                dockerClient.removeContainerCmd(containerId).withForce(true).exec();
-                log.info("Container {} removed.", containerId);
+                runCommand(List.of("docker", "run", "--rm", "-v", reportDestination + ":" + containerReportPath, imageName), tempDir);
+            } else if (isMaven) {
+                runCommand(List.of("mvn", "clean", "package"), tempDir.resolve("profile"));
+                copyDirectory(tempDir.resolve("profile/target"), reportDestination);
+            } else if (isGradle) {
+                runCommand(List.of("gradle", "build"), tempDir);
+                copyDirectory(tempDir.resolve("build/reports/tests"), reportDestination);
+            } else if (isNode) {
+                runCommand(List.of("npm", "test"), tempDir);
+                copyDirectory(tempDir.resolve("cypress/reports"), reportDestination);
+            } else {
+                throw new IllegalArgumentException("Unknown project type or no test reports found");
             }
-        } catch (IOException e) {
-            log.error("Failed to close Docker client resources.", e);
+            deleteDirectory(tempDir);
+        } catch (InterruptedException | IOException e) {
+            logger.error(e.getMessage(), e);
         }
     }
 
-    /**
-     * Copies a directory from the container, which is delivered as a TAR stream,
-     * and extracts it to the configured host path.
-     *
-     * @param dockerClient The active DockerClient.
-     * @param containerId  The ID of the container to copy from.
-     */
-    private void copyReportsFromContainer(DockerClient dockerClient, String containerId) {
-        try (InputStream tarStream = dockerClient.copyArchiveFromContainerCmd(containerId, reportsContainerPath).exec()) {
-            untar(tarStream, reportsHostPath);
-            log.info("Successfully copied and extracted reports to host path: {}", new File(reportsHostPath).getAbsolutePath());
-        } catch (NotFoundException e) {
-            log.warn("Could not find report directory '{}' in container. Tests may have failed before reports were generated.", reportsContainerPath);
-        } catch (IOException e) {
-            log.error("Failed to copy or extract reports from container {}.", containerId, e);
+    private void runCommand(List<String> command, Path workingDir) throws IOException, InterruptedException {
+        ProcessBuilder pb = new ProcessBuilder(command);
+        pb.directory(workingDir.toFile());
+        pb.redirectErrorStream(true); // Combine stdout and stderr
+        Process process = pb.start();
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                System.out.println(line); // Or log
+            }
+        }
+        int exitCode = process.waitFor();
+        if (exitCode != 0) {
+            throw new RuntimeException("Command failed: " + String.join(" ", command));
         }
     }
 
-    /**
-     * Extracts a TAR input stream to a destination directory on the host.
-     *
-     * @param tarInputStream  The TAR stream to extract.
-     * @param destinationPath The path on the host to extract files to.
-     * @throws IOException if an I/O error occurs.
-     */
-    private void untar(InputStream tarInputStream, String destinationPath) throws IOException {
-        File destDir = new File(destinationPath);
-        destDir.mkdirs(); // Ensure the destination directory exists
-        try (TarArchiveInputStream tarIn = new TarArchiveInputStream(tarInputStream)) {
-            TarArchiveEntry entry;
-            while ((entry = tarIn.getNextTarEntry()) != null) {
-                File destFile = new File(destDir, entry.getName());
-                if (entry.isDirectory()) {
-                    destFile.mkdirs();
-                } else {
-                    try (OutputStream out = new FileOutputStream(destFile)) {
-                        tarIn.transferTo(out);
-                    }
+    private void copyDirectory(Path source, Path destination) throws IOException {
+        if (!Files.isDirectory(source)) return;
+        Files.walkFileTree(source, new SimpleFileVisitor<Path>() {
+            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                Path targetDir = destination.resolve(source.relativize(dir));
+                if (!Files.isDirectory(targetDir)) {
+                    Files.createDirectories(targetDir);
                 }
+                return FileVisitResult.CONTINUE;
             }
-        }
+
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                Files.copy(file, destination.resolve(source.relativize(file)), StandardCopyOption.REPLACE_EXISTING);
+                return FileVisitResult.CONTINUE;
+            }
+        });
+    }
+
+    private void deleteDirectory(Path path) throws IOException {
+        if (!Files.exists(path)) return;
+        Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                Files.delete(file);
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                Files.delete(dir);
+                return FileVisitResult.CONTINUE;
+            }
+        });
     }
 }

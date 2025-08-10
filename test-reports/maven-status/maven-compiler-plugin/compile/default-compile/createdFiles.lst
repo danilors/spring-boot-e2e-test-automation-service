@@ -1,0 +1,6 @@
+br/com/chain/profile/ProfileController.class
+br/com/chain/profile/ProfileRepository.class
+br/com/chain/profile/ProfileService.class
+br/com/chain/profile/Profile.class
+br/com/chain/profile/ProfileApplication.class
+br/com/chain/profile/Profile$ProfileBuilder.class
