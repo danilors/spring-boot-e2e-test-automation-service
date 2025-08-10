@@ -1,63 +1,75 @@
 
-🚀 ## Spring Boot E2E Test Automation Service
-Este projeto é uma aplicação Spring Boot que expõe um endpoint REST para automatizar a execução de testes de ponta a ponta (E2E) em um ambiente isolado e consistente usando um contêiner Docker.
+# 🚀 Spring Boot E2E Test Automation Service
 
-A funcionalidade principal utiliza a API do Docker para, de forma programática, iniciar um contêiner, clonar um repositório Git, e executar um conjunto de testes Maven dentro dele.
+This project is a Spring Boot application that exposes a REST endpoint to automate the execution of end-to-end (E2E) tests in an isolated and consistent environment using a Docker container.
 
-💻 Tecnologias Utilizadas
-Java 17+: Linguagem de programação principal.
+The core functionality uses the Docker API to programmatically start a container, clone a Git repository, and run a set of Maven tests within it.
 
-Spring Boot: Framework para a construção da aplicação.
+### 💻 Technologies Used
 
-Maven: Ferramenta de build e gerenciamento de dependências.
+* **Java 21+**: Main programming language.
 
-Docker Client (docker-java): Biblioteca para interagir com o daemon do Docker.
+* **Spring Boot**: Framework para a construção da aplicação.
 
-Git: Para clonar o repositório de testes.
+* **Maven**: Library for interacting with the Docker daemon.
 
-📋 Pré-requisitos
-Antes de executar a aplicação, certifique-se de que você tem os seguintes softwares instalados:
+* **Docker Client (docker-java)**: For cloning the test repository.
 
-Java Development Kit (JDK) 17 ou superior
+* **Git**: Para clonar o repositório de testes.
 
-Maven
+### 📋 Pré-requisitos
 
-Docker (e o daemon do Docker deve estar em execução)
+Before running the application, make sure you have the following software installed:
 
-🛠 Como Executar o Projeto
-Clone este repositório para sua máquina local:
+* **Java Development Kit (JDK) 17 ou superior**
 
-git clone https://github.com/seu-usuario/este-repositorio.git
-cd este-repositorio
+* **Maven**
 
+* **Docker** (and the Docker daemon must be running)
 
-Construa a aplicação usando Maven:
+### 🛠 Como Executar o Projeto
 
-mvn clean install
+1.  Clone este repositório para sua máquina local:
 
+    ```
+    git clone https://github.com/seu-usuario/este-repositorio.git
+    cd este-repositorio
+    ```
 
-Execute a aplicação Spring Boot:
+2.  Build the application using Maven:
 
-java -jar target/your-app-name.jar
+    ```
+    mvn clean install
+    ```
 
+3.  Run the Spring Boot application:
 
-(Substitua your-app-name.jar pelo nome do arquivo JAR gerado)
+    ```
+    java -jar target/your-app-name.jar
+    ```
 
-🚀 Endpoint da API
-A aplicação expõe um único endpoint REST para iniciar o processo de testes.
+    (Replace your-app-name.jar with the name of the generated JAR file)
 
-GET /tests/start
-URL: http://localhost:8080/tests/start
+### 🚀 Endpoint da API
 
-Método: GET
+The application exposes a single REST endpoint to initiate the test process.
 
-Descrição: Este endpoint inicia o processo de testes. Ele cria um contêiner Docker, clona um repositório de testes, executa mvn clean install test e, em seguida, exibe os logs e remove o contêiner. A resposta HTTP será retornada após a conclusão do processo de testes.
+#### `GET /tests/start`
 
-📚 Exemplo de Uso
-Para iniciar a execução dos testes, basta fazer uma requisição GET para o endpoint usando um navegador ou uma ferramenta como o curl:
+* **URL**: `http://localhost:8080/tests/start`
 
+* **Method**: `GET`
+
+* **Description**: This endpoint starts the test process. It creates a Docker container, clones a test repository, runs  `mvn clean install test` e, and then displays the logs and removes the container. The HTTP response will be returned upon completion of the test process.
+
+### 📚 Exemplo de Uso
+
+To initiate the test execution, simply make a GET request to the endpoint using a browser or a tool like `curl`:
+
+```
 curl http://localhost:8080/tests/start
+```
 
+### 📝 Contribuindo
 
-📝 Contribuindo
-Sinta-se à vontade para fazer fork do projeto e enviar pull requests. Para maiores informações, abra uma issue no GitHub.
+Feel free to `fork` the project and submit `pull requests`. For more information, please open an `issue` on GitHub.
