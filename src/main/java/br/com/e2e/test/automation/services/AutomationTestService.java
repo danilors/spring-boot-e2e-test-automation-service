@@ -27,6 +27,7 @@ public class AutomationTestService {
         this.suiteService = suiteService;
     }
 
+    @Async
     public void runSuiteTestsById(long suiteId) {
         logger.info("Starting runSuiteTestsById with suiteId={}", suiteId);
         suiteService.findById(suiteId)
@@ -42,7 +43,7 @@ public class AutomationTestService {
                 );
     }
 
-    @Async
+
     public void runTestsAndCopyReport(SuiteDTO suite) {
         logger.info("Running tests and copying report for suite: {}", suite.name());
         Path tempDir = null;
