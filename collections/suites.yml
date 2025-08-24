@@ -1,0 +1,98 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2024-06-10T00:00:00.000Z",
+  "__export_source": "insomnia.desktop.app:v2024.2.0",
+  "resources": [
+    {
+      "_id": "wrk_1",
+      "name": "SuiteController API",
+      "_type": "workspace"
+    },
+    {
+      "_id": "env_1",
+      "parentId": "wrk_1",
+      "_type": "environment",
+      "name": "Base Environment",
+      "data": {
+        "base_url": "http://localhost:8080/api/suites"
+      }
+    },
+    {
+      "_id": "fld_1",
+      "_type": "request_group",
+      "parentId": "wrk_1",
+      "name": "Suites"
+    },
+    {
+      "_id": "req_get_all",
+      "parentId": "fld_1",
+      "_type": "request",
+      "name": "Get All Suites",
+      "method": "GET",
+      "url": "{{ base_url }}",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {}
+    },
+    {
+      "_id": "req_get_by_id",
+      "parentId": "fld_1",
+      "_type": "request",
+      "name": "Get Suite by ID",
+      "method": "GET",
+      "url": "{{ base_url }}/1",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {}
+    },
+    {
+      "_id": "req_post",
+      "parentId": "fld_1",
+      "_type": "request",
+      "name": "Create Suite",
+      "method": "POST",
+      "url": "{{ base_url }}",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Sample Suite\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "authentication": {}
+    },
+    {
+      "_id": "req_put",
+      "parentId": "fld_1",
+      "_type": "request",
+      "name": "Update Suite",
+      "method": "PUT",
+      "url": "{{ base_url }}/1",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Updated Suite\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        { "name": "Content-Type", "value": "application/json" }
+      ],
+      "authentication": {}
+    },
+    {
+      "_id": "req_delete",
+      "parentId": "fld_1",
+      "_type": "request",
+      "name": "Delete Suite",
+      "method": "DELETE",
+      "url": "{{ base_url }}/1",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {}
+    }
+  ]
+}
