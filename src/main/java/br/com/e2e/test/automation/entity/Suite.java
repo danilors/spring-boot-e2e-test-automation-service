@@ -1,5 +1,6 @@
 package br.com.e2e.test.automation.entity;
 
+import br.com.e2e.test.automation.SuiteDTO;
 import jakarta.persistence.*;
 
 @Entity
@@ -50,4 +51,59 @@ public class Suite {
     public void setName(String name) {
         this.name = name;
     }
+
+    public Suite() {
+    }
+
+    private Suite(Builder builder) {
+        this.id = builder.id;
+        this.name = builder.name;
+        this.repoUrl = builder.repoUrl;
+        this.repoPath = builder.repoPath;
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private Long id;
+        private String name;
+        private String repoUrl;
+        private String repoPath;
+
+        public Builder id(Long id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder repoUrl(String repoUrl) {
+            this.repoUrl = repoUrl;
+            return this;
+        }
+
+        public Builder repoPath(String repoPath) {
+            this.repoPath = repoPath;
+            return this;
+        }
+
+        public Suite build() {
+            return new Suite(this);
+        }
+    }
+
+    public SuiteDTO toDTO() {
+        return new SuiteDTO(
+                this.getId(),
+                this.getName(),
+                this.getRepoUrl(),
+                this.getRepoPath()
+        );
+    }
+
 }

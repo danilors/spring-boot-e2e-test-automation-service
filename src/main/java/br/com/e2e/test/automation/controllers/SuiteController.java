@@ -1,7 +1,6 @@
 package br.com.e2e.test.automation.controllers;
 
 import br.com.e2e.test.automation.SuiteDTO;
-import br.com.e2e.test.automation.entity.Suite;
 import br.com.e2e.test.automation.services.SuiteService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,27 +30,21 @@ public class SuiteController {
     }
 
     @PostMapping
-    public SuiteDTO createSuite(@RequestBody Suite suite) {
+    public SuiteDTO createSuite(@RequestBody SuiteDTO suite) {
         return suiteService.save(suite);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<SuiteDTO> updateSuite(@PathVariable Long id, @RequestBody Suite suite) {
-        return suiteService.findById(id)
-                .map(existing -> {
-                    suite.setId(id);
-                    return ResponseEntity.ok(suiteService.update(suite));
-                })
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<SuiteDTO> updateSuite(@PathVariable Long id, @RequestBody SuiteDTO suite) {
+        return ResponseEntity
+                .accepted()
+                .body(suiteService.update(id, suite));
+
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteSuite(@PathVariable Long id) {
-        return suiteService.findById(id)
-                .map(existing -> {
-                    suiteService.deleteById(id);
-                    return ResponseEntity.noContent().build();
-                })
-                .orElse(ResponseEntity.<Void>notFound().build());
+    public ResponseEntity<Void> deleteSuite(@PathVariable Long id) {
+        suiteService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }

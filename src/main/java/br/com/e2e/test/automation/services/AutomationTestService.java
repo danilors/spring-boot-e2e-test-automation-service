@@ -1,8 +1,8 @@
 package br.com.e2e.test.automation.services;
 
 import br.com.e2e.test.automation.SuiteDTO;
-import br.com.e2e.test.automation.entity.Suite;
 import br.com.e2e.test.automation.exceptions.SuiteNotFoundException;
+import ch.qos.logback.core.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
@@ -43,7 +43,8 @@ public class AutomationTestService {
         try {
             Path reportDestination = Path.of(destination);
             tempDir = Files.createTempDirectory("cloned-repo-" + suite.name() + "-");
-            runCommand(List.of("git", "clone", suite.repoUrl(), tempDir.toString()), Paths.get(suite.repoPath()));
+            var path = StringUtil.isNullOrEmpty(suite.repoPath()) ? "." : suite.repoPath();
+            runCommand(List.of("git", "clone", suite.repoUrl(), tempDir.toString()), Paths.get(path));
 
             String imageName = "temp-test-image";
             runCommand(List.of("docker", "build", "-t", imageName, "."), tempDir);
