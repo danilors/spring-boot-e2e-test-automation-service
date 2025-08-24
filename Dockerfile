@@ -4,4 +4,8 @@ WORKDIR /app
 
 COPY . .
 
-CMD ["mvn", "clean", "verify"]
+RUN mvn clean verify && \
+    mkdir -p /app/report-out && \
+    cp -r /app/target/surefire-reports /app/report-out/
+
+CMD ["tail", "-f", "/dev/null"]

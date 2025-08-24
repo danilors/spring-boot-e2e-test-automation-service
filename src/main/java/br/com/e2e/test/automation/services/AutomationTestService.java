@@ -59,9 +59,14 @@ public class AutomationTestService {
             logger.info("Building Docker image: {}", imageName);
             runCommand(List.of("docker", "build", "-t", imageName, "."), tempDir);
 
-            String containerReportPath = "/app/target/surefire-reports";
-            logger.info("Running Docker container to execute tests and copy reports");
-            runCommand(List.of("docker", "run", "--rm", "-v", reportDestination + ":" + containerReportPath, imageName), tempDir);
+            String containerReportPath = "/app/report-out";
+            runCommand(List.of("docker", "run", "--rm", "-v", tempDir + ":" + containerReportPath, imageName), tempDir);
+// In Dockerfile or test script, copy reports to /app/report-out after tests
+            // 1. Run the container
+            runCommand(List.of("docker", "run", "--rm", "-v", tempDir + ":" + containerReportPath, imageName), tempDir);
+
+            // 2. Copy the report from container to host (if needed, e.g., if the report is generated elsewhere in the container)
+            runCommand(List.of("docker", "cp", "container_id:" + containerReportPath, tempDir.toString()), tempDir);
 
             logger.info("Deleting temp directory: {}", tempDir);
             deleteDirectory(tempDir);
