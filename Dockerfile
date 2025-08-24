@@ -1,11 +1,8 @@
-FROM maven:3.9.7-eclipse-temurin-21 AS build
-
 WORKDIR /app
-
 COPY . .
+CMD ["mvn", "clean", "test", "verify"]
 
-RUN mvn clean verify && \
-    mkdir -p /app/report-out && \
-    cp -r /app/target/surefire-reports /app/report-out/
-
-CMD ["tail", "-f", "/dev/null"]
+FROM eclipse-temurin:17-jre
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
+COPY --from=build /app/target/surefire-reports /app/report-out
