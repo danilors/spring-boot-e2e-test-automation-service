@@ -48,7 +48,7 @@ public class AutomationTestService {
         logger.info("Running tests and copying report for suite: {}", suite.name());
         Path tempDir = null;
         try {
-            Path reportDestination = Path.of(destination);
+
             tempDir = Files.createTempDirectory("cloned-repo-" + suite.name() + "-");
             logger.info("Created temp directory: {}", tempDir);
 
@@ -60,17 +60,19 @@ public class AutomationTestService {
             logger.info("Building Docker image: {}", imageName);
             runCommand(List.of("docker", "build", "-t", imageName, "."), tempDir);
 
-            String containerReportPath = "/app/report-out";
-            runCommand(List.of("docker", "run", "--rm", "-v", tempDir + ":" + containerReportPath, imageName), tempDir);
-// In Dockerfile or test script, copy reports to /app/report-out after tests
-            // 1. Run the container
-            runCommand(List.of("docker", "run", "--rm", "-v", tempDir + ":" + containerReportPath, imageName), tempDir);
+            Path reportDestination = Path.of(destination);
+            //Files.createDirectories(reportDestination);
 
-            // 2. Copy the report from container to host (if needed, e.g., if the report is generated elsewhere in the container)
-            runCommand(List.of("docker", "cp", "container_id:" + containerReportPath, tempDir.toString()), tempDir);
+            String containerName = "temp-test-container-" + System.currentTimeMillis();
 
-            logger.info("Deleting temp directory: {}", tempDir);
-            deleteDirectory(tempDir);
+            // 1. Run the container (without --rm, with a name)
+            runCommand(List.of("docker", "run", "--name", containerName, imageName), tempDir);
+
+            // 2. Copy the report from the container to the host
+            runCommand(List.of("docker", "cp", containerName + ":/app/target/surefire-reports", reportDestination.toString()), tempDir);
+
+            // 3. Remove the container
+            runCommand(List.of("docker", "rm", containerName), tempDir);
             logger.info("Test execution and report copy completed for suite: {}", suite.name());
         } catch (InterruptedException | IOException e) {
             logger.error("Error during test execution for suite {}: {}", suite.name(), e.getMessage(), e);
