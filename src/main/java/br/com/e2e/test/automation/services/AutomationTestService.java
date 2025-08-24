@@ -12,6 +12,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.*;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -60,8 +61,8 @@ public class AutomationTestService {
             logger.info("Building Docker image: {}", imageName);
             runCommand(List.of("docker", "build", "-t", imageName, "."), tempDir);
 
-            Path reportDestination = Path.of(destination);
-            //Files.createDirectories(reportDestination);
+            Path reportDestination = cleanOrCreateDestination(destination);
+            Files.createDirectories(reportDestination);
 
             String containerName = "temp-test-container-" + System.currentTimeMillis();
 
@@ -69,13 +70,33 @@ public class AutomationTestService {
             runCommand(List.of("docker", "run", "--name", containerName, imageName), tempDir);
 
             // 2. Copy the report from the container to the host
-            runCommand(List.of("docker", "cp", containerName + ":/app/target/surefire-reports", reportDestination.toString()), tempDir);
+            runCommand(List.of("docker", "cp", containerName + ":/app/" + suite.reportPath(), reportDestination.toString()), tempDir);
 
             // 3. Remove the container
             runCommand(List.of("docker", "rm", containerName), tempDir);
             logger.info("Test execution and report copy completed for suite: {}", suite.name());
         } catch (InterruptedException | IOException e) {
             logger.error("Error during test execution for suite {}: {}", suite.name(), e.getMessage(), e);
+        }
+    }
+
+    private Path cleanOrCreateDestination(String destination) throws IOException {
+        Path reportDestination = Path.of(destination);
+        if (Files.exists(reportDestination)) {
+            // Clean directory
+            Files.walk(reportDestination)
+                    .sorted(Comparator.reverseOrder())
+                    .filter(path -> !path.equals(reportDestination))
+                    .forEach(path -> {
+                        try {
+                            Files.delete(path);
+                        } catch (IOException e) {
+                            throw new RuntimeException("Failed to clean report directory", e);
+                        }
+                    });
+            return reportDestination;
+        } else {
+            return Files.createDirectories(reportDestination);
         }
     }
 

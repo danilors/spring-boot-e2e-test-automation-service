@@ -19,6 +19,9 @@ public class Suite {
     @Column(name = "repo_path", nullable = false)
     private String repoPath;
 
+    @Column(name = "report_path", nullable = false)
+    private String reportPath;
+
     // Getters and setters
     public Long getId() {
         return id;
@@ -52,6 +55,14 @@ public class Suite {
         this.name = name;
     }
 
+    public String getReportPath() {
+        return reportPath;
+    }
+
+    public void setReportPath(String reportPath) {
+        this.reportPath = reportPath;
+    }
+
     public Suite() {
     }
 
@@ -60,6 +71,7 @@ public class Suite {
         this.name = builder.name;
         this.repoUrl = builder.repoUrl;
         this.repoPath = builder.repoPath;
+        this.reportPath = builder.reportPath;
     }
 
     public static Builder builder() {
@@ -71,6 +83,7 @@ public class Suite {
         private String name;
         private String repoUrl;
         private String repoPath;
+        private String reportPath;
 
         public Builder id(Long id) {
             this.id = id;
@@ -92,6 +105,11 @@ public class Suite {
             return this;
         }
 
+        public Builder reportPath(String reportPath) {
+            this.reportPath = reportPath;
+            return this;
+        }
+
         public Suite build() {
             return new Suite(this);
         }
@@ -102,7 +120,8 @@ public class Suite {
                 this.getId(),
                 this.getName(),
                 this.getRepoUrl(),
-                this.getRepoPath()
+                this.getRepoPath(),
+                this.getReportPath()
         );
     }
 
