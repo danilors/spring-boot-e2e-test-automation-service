@@ -1,98 +1,162 @@
-{
-  "_type": "export",
-  "__export_format": 4,
-  "__export_date": "2024-06-10T00:00:00.000Z",
-  "__export_source": "insomnia.desktop.app:v2024.2.0",
-  "resources": [
-    {
-      "_id": "wrk_1",
-      "name": "SuiteController API",
-      "_type": "workspace"
-    },
-    {
-      "_id": "env_1",
-      "parentId": "wrk_1",
-      "_type": "environment",
-      "name": "Base Environment",
-      "data": {
-        "base_url": "http://localhost:8080/api/suites"
-      }
-    },
-    {
-      "_id": "fld_1",
-      "_type": "request_group",
-      "parentId": "wrk_1",
-      "name": "Suites"
-    },
-    {
-      "_id": "req_get_all",
-      "parentId": "fld_1",
-      "_type": "request",
-      "name": "Get All Suites",
-      "method": "GET",
-      "url": "{{ base_url }}",
-      "body": {},
-      "parameters": [],
-      "headers": [],
-      "authentication": {}
-    },
-    {
-      "_id": "req_get_by_id",
-      "parentId": "fld_1",
-      "_type": "request",
-      "name": "Get Suite by ID",
-      "method": "GET",
-      "url": "{{ base_url }}/1",
-      "body": {},
-      "parameters": [],
-      "headers": [],
-      "authentication": {}
-    },
-    {
-      "_id": "req_post",
-      "parentId": "fld_1",
-      "_type": "request",
-      "name": "Create Suite",
-      "method": "POST",
-      "url": "{{ base_url }}",
-      "body": {
-        "mimeType": "application/json",
-        "text": "{\n  \"name\": \"Sample Suite\"\n}"
-      },
-      "parameters": [],
-      "headers": [
-        { "name": "Content-Type", "value": "application/json" }
-      ],
-      "authentication": {}
-    },
-    {
-      "_id": "req_put",
-      "parentId": "fld_1",
-      "_type": "request",
-      "name": "Update Suite",
-      "method": "PUT",
-      "url": "{{ base_url }}/1",
-      "body": {
-        "mimeType": "application/json",
-        "text": "{\n  \"name\": \"Updated Suite\"\n}"
-      },
-      "parameters": [],
-      "headers": [
-        { "name": "Content-Type", "value": "application/json" }
-      ],
-      "authentication": {}
-    },
-    {
-      "_id": "req_delete",
-      "parentId": "fld_1",
-      "_type": "request",
-      "name": "Delete Suite",
-      "method": "DELETE",
-      "url": "{{ base_url }}/1",
-      "body": {},
-      "parameters": [],
-      "headers": [],
-      "authentication": {}
-    }
-  ]
-}
+type: collection.insomnia.rest/5.0
+name: SuiteController API
+meta:
+  id: wrk_c84d4120c4cf43c09771602812146dc0
+  created: 1756058920205
+  modified: 1756058920205
+  description: ""
+collection:
+  - name: Suites
+    meta:
+      id: fld_68d01015e2d14a86bfbeb6a5ecc8d89f
+      created: 1756058920209
+      modified: 1756072629270
+      sortKey: -1756058920209
+      description: ""
+    children:
+      - url: "{{ _.base_url }}"
+        name: Get All Suites
+        meta:
+          id: req_43adead78c26420eaef3464c390affa1
+          created: 1756058920210
+          modified: 1756072651662
+          isPrivate: false
+          description: ""
+          sortKey: -1756058920210
+        method: GET
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/1"
+        name: Get Suite by ID
+        meta:
+          id: req_7f54f22933a740408b432c09d3278305
+          created: 1756058920211
+          modified: 1756058920211
+          isPrivate: false
+          description: ""
+          sortKey: -1756058920211
+        method: GET
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}"
+        name: Create Suite
+        meta:
+          id: req_1895d6c3652d4c28b8308acc53d25a30
+          created: 1756058920212
+          modified: 1756070775322
+          isPrivate: false
+          description: ""
+          sortKey: -1756058920212
+        method: POST
+        body:
+          mimeType: application/json
+          text: >-
+            {
+              "name": "spring-boot-e2e-test-automation-service",
+              "repoUrl": "git@github.com:danilors/spring-boot-e2e-test-automation-service.git",
+              "repoPath": "."
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/1"
+        name: Update Suite
+        meta:
+          id: req_49d77e27652f4de5b05b2dc90676db90
+          created: 1756058920212
+          modified: 1756058920212
+          isPrivate: false
+          description: ""
+          sortKey: -1756058920212
+        method: PUT
+        body:
+          mimeType: application/json
+          text: |-
+            {
+              "name": "Updated Suite"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ base_url }}/1"
+        name: Delete Suite
+        meta:
+          id: req_1c0cd2d8c2a34f2e8ea9c076d70d799a
+          created: 1756058920213
+          modified: 1756058962903
+          isPrivate: false
+          description: ""
+          sortKey: -1756058920213
+        method: DELETE
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+  - url: http://localhost:5300/api/tests/start/1
+    name: api/tests/start
+    meta:
+      id: req_cee136253715494e82d07a49e79cc41d
+      created: 1756072400243
+      modified: 1756073075827
+      isPrivate: false
+      description: ""
+      sortKey: -1756072400243
+    method: GET
+    headers:
+      - name: User-Agent
+        value: insomnia/11.3.0
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+cookieJar:
+  name: Default Jar
+  meta:
+    id: jar_a76c33452d77248e23a8a3821e3956460119b268
+    created: 1756058920216
+    modified: 1756058920216
+environments:
+  name: Base Environment
+  meta:
+    id: env_b28f9da8e357416d8a370b3fc15a44f5
+    created: 1756058920208
+    modified: 1756058954504
+    isPrivate: false
+  data:
+    base_url: http://localhost:5300/api/suites
