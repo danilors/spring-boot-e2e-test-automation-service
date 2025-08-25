@@ -3,7 +3,7 @@ name: SuiteController API
 meta:
   id: wrk_c84d4120c4cf43c09771602812146dc0
   created: 1756058920205
-  modified: 1756058920205
+  modified: 1756079701661
   description: ""
 collection:
   - name: Suites
@@ -55,7 +55,7 @@ collection:
         meta:
           id: req_1895d6c3652d4c28b8308acc53d25a30
           created: 1756058920212
-          modified: 1756070775322
+          modified: 1756091021841
           isPrivate: false
           description: ""
           sortKey: -1756058920212
@@ -64,9 +64,10 @@ collection:
           mimeType: application/json
           text: >-
             {
-              "name": "spring-boot-e2e-test-automation-service",
-              "repoUrl": "git@github.com:danilors/spring-boot-e2e-test-automation-service.git",
-              "repoPath": "."
+            	"name": "node-app",
+            	"repoUrl": "git@github.com:danilors/spring-boot-e2e-test-automation-service.git",
+            	"repoPath": "node-app",
+            	"reportPath": "./test-report.html"
             }
         headers:
           - name: Content-Type
@@ -79,22 +80,26 @@ collection:
             send: true
             store: true
           rebuildPath: true
-      - url: "{{ base_url }}/1"
+      - url: "{{ base_url }}/2"
         name: Update Suite
         meta:
           id: req_49d77e27652f4de5b05b2dc90676db90
           created: 1756058920212
-          modified: 1756058920212
+          modified: 1756090050198
           isPrivate: false
           description: ""
           sortKey: -1756058920212
         method: PUT
         body:
           mimeType: application/json
-          text: |-
-            {
-              "name": "Updated Suite"
-            }
+          text: >-
+            	{
+            		"id": 2,
+            		"name": "node-app",
+            		"repoUrl": "git@github.com:danilors/spring-boot-e2e-test-automation-service.git",
+            		"repoPath": "node-app",
+            		"reportPath": "./test-report.html"
+            	}
         headers:
           - name: Content-Type
             value: application/json
@@ -106,12 +111,12 @@ collection:
             send: true
             store: true
           rebuildPath: true
-      - url: "{{ base_url }}/1"
+      - url: "{{ base_url }}/2"
         name: Delete Suite
         meta:
           id: req_1c0cd2d8c2a34f2e8ea9c076d70d799a
           created: 1756058920213
-          modified: 1756058962903
+          modified: 1756089808588
           isPrivate: false
           description: ""
           sortKey: -1756058920213
@@ -129,7 +134,7 @@ collection:
     meta:
       id: req_cee136253715494e82d07a49e79cc41d
       created: 1756072400243
-      modified: 1756073075827
+      modified: 1756091262410
       isPrivate: false
       description: ""
       sortKey: -1756072400243

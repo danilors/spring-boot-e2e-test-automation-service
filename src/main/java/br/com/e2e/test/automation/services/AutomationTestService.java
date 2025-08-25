@@ -14,6 +14,7 @@ import java.io.InputStreamReader;
 import java.nio.file.*;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class AutomationTestService {
@@ -61,7 +62,7 @@ public class AutomationTestService {
             logger.info("Building Docker image: {}", imageName);
             runCommand(List.of("docker", "build", "-t", imageName, repoPath), tempDir);
 
-            Path reportDestination = cleanOrCreateDestination(destination);
+            Path reportDestination = cleanOrCreateDestination(suite.name(), destination);
             Files.createDirectories(reportDestination);
 
             String containerName = String.format("temp-test-container-%s", suite.name()) + System.currentTimeMillis();
@@ -80,8 +81,8 @@ public class AutomationTestService {
         }
     }
 
-    private Path cleanOrCreateDestination(String destination) throws IOException {
-        Path reportDestination = Path.of(destination);
+    private Path cleanOrCreateDestination(String suiteName, String destination) throws IOException {
+        Path reportDestination = Path.of(destination, suiteName, UUID.randomUUID().toString());
         if (Files.exists(reportDestination)) {
             // Clean directory
             try (var paths = Files.walk(reportDestination)) {
