@@ -75,7 +75,11 @@ public class AutomationTestService {
 
             // 3. Remove the container
             runCommand(List.of("docker", "rm", containerName), tempDir);
+
+            // 4. remove temp cloned repo folder
+            deleteDirectory(tempDir);
             logger.info("Test execution and report copy completed for suite: {}", suite.name());
+
         } catch (InterruptedException | IOException e) {
             logger.error("Error during test execution for suite {}: {}", suite.name(), e.getMessage(), e);
         }
