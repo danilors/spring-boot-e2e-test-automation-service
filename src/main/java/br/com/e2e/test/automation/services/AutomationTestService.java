@@ -53,18 +53,18 @@ public class AutomationTestService {
             tempDir = Files.createTempDirectory("cloned-repo-" + suite.name() + "-");
             logger.info("Created temp directory: {}", tempDir);
 
-            var path = StringUtil.isNullOrEmpty(suite.repoPath()) ? "." : suite.repoPath();
+            var repoPath = StringUtil.isNullOrEmpty(suite.repoPath()) ? "." : suite.repoPath();
             logger.info("Cloning repo {} into {}", suite.repoUrl(), tempDir);
-            runCommand(List.of("git", "clone", suite.repoUrl(), tempDir.toString()), Paths.get(path));
+            runCommand(List.of("git", "clone", suite.repoUrl(), tempDir.toString()), Paths.get(repoPath));
 
-            String imageName = "temp-test-image";
+            String imageName = String.format("temp-test-image-%s", suite.name());
             logger.info("Building Docker image: {}", imageName);
             runCommand(List.of("docker", "build", "-t", imageName, "."), tempDir);
 
             Path reportDestination = cleanOrCreateDestination(destination);
             Files.createDirectories(reportDestination);
 
-            String containerName = "temp-test-container-" + System.currentTimeMillis();
+            String containerName = String.format("temp-test-container-%s", suite.name()) + System.currentTimeMillis();
 
             // 1. Run the container (without --rm, with a name)
             runCommand(List.of("docker", "run", "--name", containerName, imageName), tempDir);
@@ -84,16 +84,17 @@ public class AutomationTestService {
         Path reportDestination = Path.of(destination);
         if (Files.exists(reportDestination)) {
             // Clean directory
-            Files.walk(reportDestination)
-                    .sorted(Comparator.reverseOrder())
-                    .filter(path -> !path.equals(reportDestination))
-                    .forEach(path -> {
-                        try {
-                            Files.delete(path);
-                        } catch (IOException e) {
-                            throw new RuntimeException("Failed to clean report directory", e);
-                        }
-                    });
+            try (var paths = Files.walk(reportDestination)) {
+                paths.sorted(Comparator.reverseOrder())
+                        .filter(path -> !path.equals(reportDestination))
+                        .forEach(path -> {
+                            try {
+                                Files.delete(path);
+                            } catch (IOException e) {
+                                throw new RuntimeException("Failed to clean report directory", e);
+                            }
+                        });
+            }
             return reportDestination;
         } else {
             return Files.createDirectories(reportDestination);

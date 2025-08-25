@@ -1,0 +1,20 @@
+{
+  "name": "projects",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+  "dev": "vite",
+  "build": "tsc && vite build",
+  "preview": "vite preview",
+  "test": "jest --coverage --reporters=default --reporters=jest-html-reporter"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "jest": "^30.0.5",
+    "jest-html-reporter": "^4.3.0",
+    "ts-jest": "^29.4.1",
+    "typescript": "~5.8.3",
+    "vite": "^7.1.2"
+  }
+}
