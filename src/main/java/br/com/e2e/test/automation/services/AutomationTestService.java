@@ -59,7 +59,7 @@ public class AutomationTestService {
 
             String imageName = String.format("temp-test-image-%s", suite.name());
             logger.info("Building Docker image: {}", imageName);
-            runCommand(List.of("docker", "build", "-t", imageName, "."), tempDir);
+            runCommand(List.of("docker", "build", "-t", imageName, repoPath), tempDir);
 
             Path reportDestination = cleanOrCreateDestination(destination);
             Files.createDirectories(reportDestination);

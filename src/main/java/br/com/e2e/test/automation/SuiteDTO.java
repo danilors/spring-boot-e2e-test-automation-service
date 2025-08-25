@@ -9,7 +9,7 @@ public record SuiteDTO(long id, String name, String repoUrl, String repoPath, St
                 .name(name)
                 .repoUrl(repoUrl)
                 .repoPath(repoPath)
-                .repoPath(reportPath)
+                .reportPath(reportPath)
                 .build();
     }
 
