@@ -4,4 +4,4 @@ WORKDIR /app
 
 COPY . .
 
-CMD ["mvn", "clean", "verify"]
+CMD ["mvn", "clean", "verify", "site"]
