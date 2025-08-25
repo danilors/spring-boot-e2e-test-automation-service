@@ -4,4 +4,4 @@ WORKDIR /app
 
 COPY . .
 
-CMD ["mvn", "clean", "verify", "site"]
+CMD ["mvn", "clean", "surefire-report:report"]
