@@ -1,7 +1,6 @@
 package br.com.e2e.test.automation.services;
 
 import br.com.e2e.test.automation.SuiteDTO;
-import br.com.e2e.test.automation.exceptions.SuiteNotFoundException;
 import ch.qos.logback.core.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,37 +20,18 @@ public class AutomationTestService {
 
     private static final Logger logger = LoggerFactory.getLogger(AutomationTestService.class.getSimpleName());
 
-    private final SuiteService suiteService;
 
     private final String destination = System.getProperty("user.dir").concat("/report");
 
-    public AutomationTestService(SuiteService suiteService) {
-        this.suiteService = suiteService;
+    public AutomationTestService() {
     }
 
     @Async
-    public void runSuiteTestsById(long suiteId) {
-        logger.info("Starting runSuiteTestsById with suiteId={}", suiteId);
-        suiteService.findById(suiteId)
-                .ifPresentOrElse(
-                        suite -> {
-                            logger.info("Suite found: {}", suite.name());
-                            runTestsAndCopyReport(suite);
-                        },
-                        () -> {
-                            logger.warn("Suite with ID: {} not found", suiteId);
-                            throw new SuiteNotFoundException(String.format("Suite with ID: %s not found", suiteId));
-                        }
-                );
-    }
-
-
     public void runTestsAndCopyReport(SuiteDTO suite) {
         logger.info("Running tests and copying report for suite: {}", suite.name());
-        Path tempDir = null;
         try {
 
-            tempDir = Files.createTempDirectory("cloned-repo-" + suite.name() + "-");
+            Path tempDir = Files.createTempDirectory("cloned-repo-" + suite.name() + "-");
             logger.info("Created temp directory: {}", tempDir);
 
             var repoPath = StringUtil.isNullOrEmpty(suite.repoPath()) ? "." : suite.repoPath();
