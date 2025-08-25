@@ -3,5 +3,5 @@ VALUES (
   'spring-boot-e2e-test-automation-service',
   'git@github.com:danilors/spring-boot-e2e-test-automation-service.git',
   '.',
-  'target/surefire-reports'
+  'target/reports'
 );
