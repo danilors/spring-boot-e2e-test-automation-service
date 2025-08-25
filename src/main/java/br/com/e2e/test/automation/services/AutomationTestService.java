@@ -21,6 +21,7 @@ public class AutomationTestService {
     private static final Logger logger = LoggerFactory.getLogger(AutomationTestService.class.getSimpleName());
 
 
+    // private final  S3ReportUploaderService s3ReportUploaderService;
     private final String destination = System.getProperty("user.dir").concat("/report");
 
     public AutomationTestService() {
@@ -52,6 +53,9 @@ public class AutomationTestService {
 
             // 2. Copy the report from the container to the host
             runCommand(List.of("docker", "cp", containerName + ":/app/" + suite.reportPath(), reportDestination.toString()), tempDir);
+
+            // sending contento to S3 bucket
+            //s3ReportUploaderService.uploadDirectoryToS3(reportDestination, "your-bucket-name", "your/s3/prefix");
 
             // 3. Remove the container
             runCommand(List.of("docker", "rm", containerName), tempDir);
